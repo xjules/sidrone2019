@@ -7,7 +7,7 @@ from dronelib import Drone
 import util
 from ascend_msgs.srv import GlobalMap
 from geometry_msgs.msg import Pose, PoseArray
-
+from path_ops import make_rel_path, compress_path, make_abs_path, find_path
 
 def goal_callback(msg):
     global goal
@@ -22,7 +22,6 @@ def dynamic_obstacles_callback(msg):
 def boost_callback(msg):
     global boosts
     boosts = msg.poses
-
 
 def main():
     # Init ROS node
@@ -59,23 +58,17 @@ def main():
     print("Obstacles at start:")
     util.print_positions(obstacles)
 
+    path = make_abs_path(compress_path(make_rel_path(find_path(world_map, 0, 0, goal.x, goal.y))))
+
     # Initialize drone
     drone = Drone()
     drone.activate()
     drone.takeoff()
 
-    # -- For example code --
-    target_x = 0
-    target_y = 0
-
     rate = rospy.Rate(30)
+    pathidx = 0
     while not rospy.is_shutdown():
         rate.sleep()
-        # -------------------------------
-        # ------Replace this example-----
-        # ---------with your code!-------
-        # -------------------------------
-        # Find how far we are away from target
         distance_to_target = ((target_x - drone.position.x) ** 2 +
                               (target_y - drone.position.y) ** 2) ** 0.5
 
@@ -89,11 +82,14 @@ def main():
             print("Distance to goal is now", distance_to_goal)
 
             # Generate some random point and rotation
-            target_x = random.randint(-3, 3)
-            target_y = random.randint(-3, 3)
+            (target_y, target_x) = path[path_idx]
 
             # Move to random point
             drone.set_target(target_x, target_y)
+            path_idx = path_idx + 1
+            if (path_idx >= len(path)):
+                print("Can't happen!")
+                pass
         else:
             print("distance to target:", distance_to_target)
 
