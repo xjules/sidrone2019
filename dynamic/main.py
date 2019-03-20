@@ -37,6 +37,7 @@ def main():
 
     # Wait for resources to become active
     goal = rospy.wait_for_message("/goal", Pose).position
+    print('Goal is at {}'.format(goal))
     boosts = rospy.wait_for_message("/boost", PoseArray).poses
     obstacles = rospy.wait_for_message("/dynamic_obstacles", PoseArray).poses
 
@@ -52,7 +53,8 @@ def main():
 
     # Get map as 2D list
     world_map = util.parse_map(raw_map)
-
+    with open('map_gen.txt') as f:
+        f.writelines('\t'.join(str(j) for j in i) + '\n' for i in world_map)
     # Print resources
     print("Wall layout:")
     util.print_map(world_map)
