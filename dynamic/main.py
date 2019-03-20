@@ -24,6 +24,8 @@ def boost_callback(msg):
     boosts = msg.poses
 
 
+def find_path(world_map, x1, y1, x2, y2):
+
 def main():
     # Init ROS node
     rospy.init_node('task', anonymous=True)
