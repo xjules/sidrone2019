@@ -71,10 +71,14 @@ def main():
     drone.activate()
     drone.takeoff()
 
+    (target_y, target_x) = (0, 0)
+    drone.set_target(target_x, target_y)
+
     rate = rospy.Rate(30)
     pathidx = 0
     while not rospy.is_shutdown():
         rate.sleep()
+
         distance_to_target = ((target_x - drone.position.x) ** 2 +
                               (target_y - drone.position.y) ** 2) ** 0.5
 
@@ -87,10 +91,11 @@ def main():
 
             print("Distance to goal is now", distance_to_goal)
 
-            # Generate some random point and rotation
+            # Get next target
             (target_y, target_x) = path[path_idx]
+            print("New target", target_x, target_y)
 
-            # Move to random point
+            # Move to target
             drone.set_target(target_x, target_y)
             path_idx = path_idx + 1
             if (path_idx >= len(path)):
