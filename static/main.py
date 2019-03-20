@@ -33,10 +33,14 @@ def main():
     rospy.Subscriber('/boost', PoseArray, boost_callback)
     rospy.Subscriber("/dynamic_obstacles", PoseArray, dynamic_obstacles_callback)
 
+
+
     # Wait for resources to become active
     goal = rospy.wait_for_message("/goal", Pose).position
     boosts = rospy.wait_for_message("/boost", PoseArray).poses
     obstacles = rospy.wait_for_message("/dynamic_obstacles", PoseArray).poses
+
+    print('Goal is at {}'.format(goal))
 
     # Create map service client
     getMap = rospy.ServiceProxy('/GlobalMap', GlobalMap)
@@ -50,6 +54,8 @@ def main():
 
     # Get map as 2D list
     world_map = util.parse_map(raw_map)
+    with open('static_map_gen.txt') as f:
+        f.writelines('\t'.join(str(j) for j in i) + '\n' for i in world_map)
 
     # Print resources
     print("Wall layout:")
